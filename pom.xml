@@ -207,6 +207,16 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-spring-boot2 -->
+        <dependency>
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot2</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+
+
+
     </dependencies>
 
     <dependencyManagement>
@@ -219,5 +229,5 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>c
+    </dependencyManagement>
 </project>
