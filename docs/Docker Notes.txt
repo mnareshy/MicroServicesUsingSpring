@@ -1,0 +1,295 @@
+docker --version
+docker run community/repo:version
+docker run -p port:port(5000) community/repo:version
+docker run -d -p port:8761 springcloud/eureka
+
+docker run -d -p port:8761 --restart:always springcloud/eureka //Restart policy allways bring the container up
+// when docker restarts
+
+docker run -p 5000:5000 -m 512m --cpu-quota 5000 -d community/repo:version // typically 100% cpu quota is 100000 - share a percentage for container
+
+docker run -p 8761:8761 -m 512m --cpu-quota 5000 -d springcloud/eureka
+
+docker ls --options
+docker kill containerID
+
+docker container ls //gets running containers
+docker container ls -a  // get all containers
+docker container start containerID
+docker container logs containerID 
+docker container logs -f containerID  //for taling logs
+docker container rm containerID
+docker container prune // deletes all stopped containers
+
+docker container containerID start
+docker container containerID  stop //sigterm fires for gracefully stop server
+
+docker container pause containerID
+docker container unpause containerID
+
+
+docker container inspect containerID  
+
+docker system df
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          7         2         2.381GB   1.206GB (50%)
+Containers      5         1         0B        0B
+Local Volumes   5         5         633.9kB   0B (0%)
+Build Cache     0         0         0B        0B
+
+
+docker events // to view the ongoing events
+docker top containerID // to view the process in the docker
+
+docker stats // to view stats
+
+docker images
+docker image  history imageId
+docker image inspect imageId
+docker image remove imageId
+
+docker tag springcloud/eureka:latest springcloud/eureka:v1 // tags docker image to a new version
+
+docker pull mysql // pulls mysql image with latest as version
+
+docker search mysql
+NAME                              DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+mysql                             MySQL is a widely used, open-source relation…   11803     [OK]
+
+
+
+
+docker run -dit openjdk:8-jdk-alpine
+
+    
+docker container cp D:\Labs\workspace\MicroServicesUsingSpring\target\MicroServicesUsingSpring-1.0-SNAPSHOT.jar 58bbc4b332f2:/tmp
+docker container exec priceless_shaw ls /tmp
+
+docker container commit priceless_shaw
+
+docker container commit festive_archimedes testimage/xxxx1:v1
+
+docker container commit --change='CMD ["/java","-jar","/tmp/docker-in-5-steps-todo-rest-api-h2-1.0.0.RELEASE.jar"]' festive_archimedes testimage/docker-in-5-steps-todo-rest-api-h2-1.0.0:v2
+docker container commit --change='CMD ["java","-jar","/tmp/docker-in-5-steps-todo-rest-api-h2-1.0.0.RELEASE.jar"]' festive_archimedes in28min/manual-todo-rest-api:v2
+docker container commit --change='CMD ["java","-jar","/tmp/docker-in-5-steps-todo-rest-api-h2-1.0.0.RELEASE.jar"]' upbeat_panini manual-rest-api:v2
+
+
+//For windows 10
+docker container commit --change='CMD java -jar /tmp/docker-in-5-steps-todo-rest-api-h2-1.0.0.RELEASE.jar' competent_kepler manual-image:v2
+docker container commit --change='CMD java -jar /tmp/MicroServicesUsingSpring-1.0-SNAPSHOT.jar' priceless_shaw manual-image:v2
+
+
+
+
+docker container stop upbeat_panini
+docker container rm upbeat_panini
+
+
+From Maven
+
+<!-- Docker -->
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.10</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<!-- <goal>push</goal> --> 
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>in28min/${project.artifactId}</repository>
+					<tag>${project.version}</tag>
+					<skipDockerInfo>true</skipDockerInfo>
+				</configuration>
+			</plugin>
+			
+			
+Dockerfile 
+
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+EXPOSE 5001
+ADD target/*.jar app.jar
+ENTRYPOINT [ "sh", "-c", "java -jar /app.jar" ]	
+
+
+
+Dockerfile - Nodejs running from Linux
+
+# Test web-app to use with Pluralsight courses and Docker Deep Dive book
+# Linux x64
+FROM alpine
+
+LABEL maintainer="nigelpoulton@hotmail.com"
+
+# Install Node and NPM
+RUN apk add --update nodejs nodejs-npm
+
+# Copy app to /src
+COPY . /src
+
+WORKDIR /src
+
+# Install dependencies
+RUN  npm install
+
+EXPOSE 8080
+
+ENTRYPOINT ["node", "./app.js"]
+
+docker image build -t test:latest . \\create a image 
+
+ docker container run -d --name web1 --publish 8080:8080 test:latest	
+ 
+********** Demon , Client configuration with CA************
+# 1 -Client Server configuration with CA
+https://www.openssl.org/docs/man1.0.2/man1/genrsa.html
+
+- Create a new private key for the CA
+openssl genrsa -aes256 -out ca-key.pem 4096
+
+# 2- use CAs private key to generate public key
+
+ - openssl req -new -x509 -days 730 -key ca-key.pem -sha256 -out ca.pem
+ 
+# 3- Create the private key for Daemon
+
+ - openssl genrsa -out daemon-key.pem 4096
+ 
+# 4 - Create Certificate Signed Request (CSR) for CA to  create  and sign a certificate for Daemon.
+
+ - openssl req -subj "/CN=LAPTOP-GC1K0V6P" -sha256 -new -key daemon-key.pem -out daemon.csr\
+ 
+# 5 - Add required Attributes to the certificate.Create a file that tells CA to add couple extended attributes to the Daemon's Certificate when it signs it.
+      These add Daemon's DNS and IP Address , aswell configure the certificate to be valid for server authentication .
+	  create extfile.cnf with the following details.
+	  
+		subjectAltName = DNS:LAPTOP-GC1K0V6P,IP:172.24.127.105
+		extendedKeyUsage = serverAuth
+	
+# 6 -  Generate the Daemon public key. This step users CSR file , CA keys, extfile.cfg to sigh and configure Daemon's certificate. It will output Daemon's public key Daemon-cert.pem.
+
+    -  openssl x509 -req -days 730 -sha256 -in daemon.csr -CA ca.pem  -CAkey ca-key.pem -CAcreateserial -out daemon-cert.pem -extfile extfile.cnf
+	
+# 7 - Create the key pair for the Client
+	- Create the private key for Client
+	  openssl genrsa -out client-key.pem 4096
+	- Create a CSR file for CA to cretae and sign a certificate for client
+	  openssl req -subj "/CN=LAPTOP-GC1K0V6P" -sha256 -new -key client-key.pem -out client.csr
+	- create a file called extfileC.cnf and and populate with the following vale, which will make the certificate valid for client authentication.
+	  extendedKeyUsage = clientAuth
+	- Generate the Client vertificate. This step users CSR file , CA keys, extfile.cfg to sigh and configure Client's certificate. It will output Client's public key Client-cert.pem.
+      openssl x509 -req -days 730 -sha256 -in client.csr -CA ca.pem  -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -extfile extfileC.cnf
+	
+#8  - Distribution of keys
+
+	 Certificates, files created
+		-rw------- 1 sairam sairam 3326 Feb 14 09:19 ca-key.pem
+		-rw-r--r-- 1 sairam sairam 2086 Feb 14 09:24 ca.pem
+		-rw------- 1 sairam sairam 3243 Feb 14 12:04 daemon-key.pem
+		-rw-r--r-- 1 sairam sairam 1594 Feb 14 12:28 daemon.csr
+		-rw-r--r-- 1 sairam sairam   87 Feb 16 11:38 extfile.cnf
+		-rw-r--r-- 1 sairam sairam 1919 Feb 16 22:18 daemon-cert.pem
+		-rw------- 1 sairam sairam 3243 Feb 16 23:12 client-key.pem
+		-rw-r--r-- 1 sairam sairam 1594 Feb 16 23:13 client.csr
+		-rw-r--r-- 1 sairam sairam   31 Feb 16 23:17 extfileC.cnf
+		-rw-r--r-- 1 sairam sairam   41 Feb 16 23:23 ca.srl
+		-rw-r--r-- 1 sairam sairam 1874 Feb 16 23:23 client-cert.pem
+
+	
+	 - Distribute ca.pem, daemon-cert.pem, daemon-key.pem to the Daemon node
+	 - Distribute ca.pem, client-cert.pem, v to the Client node
+	 
+	 Docker requires to have the files in the following names and following locations
+	 
+	 - Daemon
+		ca.pem			-> ~/.docker/ca.pem
+		daemon-cert.pem -> ~/.docker/cert.pem 
+		daemon-key.pem  -> ~/.docker/key.pem
+		
+	-Client 
+		ca.pem			-> ~/.docker/ca.pem
+		client-cert.pem -> ~/.docker/cert.pem
+		client-key.pem  -> ~/.docker/key.pem
+		
+#9  - TLS configurations
+		
+		- Docker has 2 TLS configurations 
+			- Daemon Mode - Forces Daemon only to allow the connections from Clients with valid certificate. 
+			- Client Mode - Tells Clients only to connect Daemons with valid certificate.  
+			
+		- Daemon TLS configurations
+			-Edit /etc/docker/daemon.json
+			
+			{
+				"hosts": [tcp://DaemonNode:2376"], 				 \\ tells docker with sockets to bind the Daemon
+				"tls": true,
+				"tlsverify": true,								 \\ enables tls verification
+				"tlscacert": "/home/ubantu/.docker/ca.pem"  	 \\ Tells which CA to trust
+				"tlscert":	"/home/ubantu/.docker/cert.pem" 	 \\	Where the Daemon certificate is located
+				"tlskey": "/home/ubantu/.docker/key.pem"		 \\ Where the Daemon's private key is located	
+			}
+			
+		- Client Configurations 
+			- run $ docker -H tcp://DaemonNode:2376 version	
+				- which will not work , because Daemon is rejecting all connections from unauthenticated clients.
+			- $ export DOCKER_HOST=tcp://DaemonNode:2376
+				- this helps avoiding -H option when run docker!
+			- $ export DOCKER_TLS_VERIFY=1 \\ docker client to sign commends with its certificate
+			
+			- $ docker version should work
+		- Certificates copied in the default location, alternatively you may configure DOCKER_CERT_PATH environment variable to change the path 
+			
+********** Demon , Client configuration with CA************
+
+
+# IMages 
+	
+	- Pull images 
+	
+		- $ docker image pull redis:latest
+		
+	- docker registries 
+		- default Registry: https://index.docker.io/v1/
+		- $ docker info
+		
+		
+		
+	
+Zipkin - the Distributed Tracing Server
+
+docker run -p 9411:9411 -d  openzipkin/zipkin:latest
+		
+			
+				
+				
+# Docker Compose
+
+docker-compose --version
+
+#create docker-compose.yaml
+docker-compose up
+			
+			
+			
+			
+			
+			
+			
+			
+		
+	
+		
+		
+	 
+	 
+ 
+
+ 
+ 
+ 	

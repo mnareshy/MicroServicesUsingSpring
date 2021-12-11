@@ -5,8 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.microservices</groupId>
-    <artifactId>MicroServicesUsingSpring</artifactId>
+    <artifactId>microservicesUsingspring</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -15,8 +18,8 @@
     </parent>
 
     <properties>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <spring-cloud.version>2020.0.4</spring-cloud.version>
     </properties>
 
@@ -29,6 +32,11 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.microservices.we.SpringMicroServices</mainClass>
+                    <image>
+                        <name>docker.io/mnareshy/microservices-ms:v1</name>
+                        <!--<name>gcr.io/paketo-buildpacks/builder:base-platform-api-0.3</name>-->
+                    </image>
+					<pullPolicy>IF_NOT_PRESENT</pullPolicy>
                 </configuration>
             </plugin>
             <plugin>
@@ -215,6 +223,28 @@
             <version>1.7.0</version>
         </dependency>
 
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-sleuth -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-sleuth</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-sleuth-zipkin -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.amqp/spring-rabbit -->
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit</artifactId>
+            <version>2.3.12</version>
+        </dependency>
 
 
     </dependencies>

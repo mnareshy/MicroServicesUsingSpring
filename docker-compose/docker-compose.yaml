@@ -1,0 +1,118 @@
+version: '2.7'
+
+services:
+#  msinsurencewe:
+#    image: mnareshy/microservices-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - quote-nerwork
+#    depends_on:
+#      - naming-server
+#      - rabbitmq
+#    environment:
+#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+#      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+#      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+#      SPRING_RABBITMQ_HOST: rabbitmq
+#      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+#
+#  Quote-Service:
+#    image: mnareshy/microservices-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8090:8080"
+#    networks:
+#      - quote-nerwork
+#    depends_on:
+#      - naming-server
+#      - rabbitmq
+#    environment:
+#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+#      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+#      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+#      SPRING_RABBITMQ_HOST: rabbitmq
+#      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+#
+#  msinsurencewe1:
+#    image: mnareshy/microservices-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8081:8080"
+#    networks:
+#      - quote-nerwork
+#    depends_on:
+#      - naming-server
+#      - rabbitmq
+#    environment:
+#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+#      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+#      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+#      SPRING_RABBITMQ_HOST: rabbitmq
+#      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+#
+#  msinsurencewe2:
+#    image: mnareshy/microservices-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8082:8080"
+#    networks:
+#      - quote-nerwork
+#    depends_on:
+#      - naming-server
+#      - rabbitmq
+#    environment:
+#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+#      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+#      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+#      SPRING_RABBITMQ_HOST: rabbitmq
+#      SPRING_ZIPKIN_SENDER_TYPE: rabbit
+#
+#  naming-server:
+#    image: mnareshy/namingserver-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - quote-nerwork
+#
+#  api-gateway:
+#    image: mnareshy/apigateway-ms:v1
+#    mem_limit: 1024m
+#    ports:
+#      - "8765:8765"
+#    networks:
+#      - quote-nerwork
+#    environment:
+#      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+#      SPRING.ZIPKIN.BASEURL: http://zipkin:9411/
+#
+#
+  zipkin:
+    image: openzipkin/zipkin:latest
+    mem_limit: 1024m
+    ports:
+      - "9411:9411"
+    networks:
+      - quote-nerwork
+    depends_on:
+      - rabbitmq
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+
+# If you dont configure rabbit mq ZIPKIN used http for communication - hence rabbit configs not required in all environments as well
+  rabbitmq:
+    image: rabbitmq:latest
+    mem_limit: 1024m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - quote-nerwork
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+
+networks:
+  quote-nerwork:
