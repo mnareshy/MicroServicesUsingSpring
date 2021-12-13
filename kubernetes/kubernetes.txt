@@ -1,0 +1,173 @@
+
+#Connect to GKS
+
+>gcloud container clusters get-credentials nareshm-cluster --zone us-central1-c --project cellular-smoke-334903
+
+>kubectl version
+Client Version: version.Info{Major:"1", Minor:"22", GitVersion:"v1.22.4", GitCommit:**************", GitTreeState:"clean", BuildDate:"2021-11-17T15:48:33Z", GoVersion:"go1.16.10", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.5-gke.1302", GitCommit:"*************", GitTreeState:"clean", BuildDate:"2021-10-21T21:35:48Z", GoVersion:"go1.16.7b7", Compiler:"gc", Platform:"linux/amd64"}
+
+#Deploy image
+# Create Deployment
+
+>kubectel create deployment microservicewe --image=domain/image:version
+>kubectl create deployment microservicewe --image=mnareshy/microservices-ms:v1
+
+
+# expose deployment
+
+> kubectl expose deplyment microservicewe --type=LoadBalancer --port=8080
+> kubectl expose deployment microservicewe --type=LoadBalancer --port=8080
+
+# get all the events
+
+> kubectl get  events
+
+# pods - Pod is a collection of containers that can run on a host. This resource is
+             created by clients and scheduled onto hosts.
+
+>kubectl get pods -
+NAME                             READY   STATUS             RESTARTS   AGE
+microservicewe-6869fdf98-5484g   0/1     ImagePullBackOff   0          32m
+
+>kubectl describe pod microservicewe-6869fdf98-5484g
+>kubectl get pods -o wide
+ NAME                             READY   STATUS             RESTARTS   AGE   IP           NODE                                             NOMINATED NODE   READINESS GATES
+ microservicewe-6869fdf98-5484g   0/1     ImagePullBackOff   0          10h   10.108.2.6   gke-nareshm-cluster-default-pool-c7e2b868-w7sr   <none>           <none>
+
+
+# replicaset - eplicaSet ensures that a specified number of pod replicas are running at
+                    any given time
+
+>kubectl get replicaset
+NAME                       DESIRED   CURRENT   READY   AGE
+microservicewe-6869fdf98   1         1         0       34m
+
+> kubectl scale deployment microservicewe --replicas=3
+deployment.apps/microservicewe scaled
+
+>kubectl get replicaset
+NAME                       DESIRED   CURRENT   READY   AGE
+microservicewe-6869fdf98   3         3         0       10h
+
+
+#deployments
+>kubectl get deployments
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+microservicewe   0/1     1            0           34m
+
+kubectl set image deployment containerID imageName=imageName:newversion // ensures no downtime
+
+# servises  - Service is a named abstraction of software service (for example, mysql)
+                   consisting of local port (for example 3306) that the proxy listens on, and
+                   the selector that determines which pods will answer requests sent through
+                   the proxy.
+>kubectl get services
+NAME             TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)          AGE
+kubernetes       ClusterIP      10.112.0.1     <none>           443/TCP          11h
+microservicewe   LoadBalancer   10.112.6.112   34.135.163.157   8080:30799/TCP   10
+
+
+>kubectl get componentstatuses
+ Warning: v1 ComponentStatus is deprecated in v1.19+
+ NAME                 STATUS    MESSAGE             ERROR
+ etcd-0               Healthy   {"health":"true"}
+ scheduler            Healthy   ok
+ etcd-1               Healthy   {"health":"true"}
+ controller-manager   Healthy   ok
+
+
+
+ ############# Connect Gcloud from local
+
+ > gcloud auth login
+ > gcloud container clusters get-credentials nareshm-cluster --zone us-central1-c --project pojectID
+ >
+
+
+> kubectl create deployment quote --image=mnareshy/microservices-ms:v1
+  deployment.apps/quote created
+> kubectl expose deployment quote --type=LoadBalancer --port=8000
+    service/quote exposed
+
+>kubectl get services
+ NAME             TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)          AGE
+ kubernetes       ClusterIP      10.112.0.1     <none>           443/TCP          14h
+ microservicewe   LoadBalancer   10.112.6.112   34.135.163.157   8080:30799/TCP   13h
+ quote            LoadBalancer   10.112.2.220   35.184.195.61    8000:30720/TCP   4m
+
+>kubectl get deployment quote -o yaml
+ apiVersion: apps/v1
+ kind: Deployment
+ metadata:
+   annotations:
+     deployment.kubernetes.io/revision: "1"
+   creationTimestamp: "2021-12-12T19:44:16Z"
+   generation: 1
+   labels:
+     app: quote
+   name: quote
+   namespace: default
+   resourceVersion: "308980"
+   uid: 691467b3-da79-49fb-b634-fcf767ee1c2b
+ spec:
+   progressDeadlineSeconds: 600
+   replicas: 1
+   revisionHistoryLimit: 10
+   selector:
+     matchLabels:
+       app: quote
+   strategy:
+     rollingUpdate:
+       maxSurge: 25%
+       maxUnavailable: 25%
+     type: RollingUpdate
+   template:
+     metadata:
+       creationTimestamp: null
+       labels:
+         app: quote
+     spec:
+       containers:
+       - image: mnareshy/microservices-ms:v1
+         imagePullPolicy: IfNotPresent
+         name: microservices-ms
+         resources: {}
+         terminationMessagePath: /dev/termination-log
+         terminationMessagePolicy: File
+       dnsPolicy: ClusterFirst
+       restartPolicy: Always
+       schedulerName: default-scheduler
+       securityContext: {}
+       terminationGracePeriodSeconds: 30
+ status:
+   availableReplicas: 1
+   conditions:
+   - lastTransitionTime: "2021-12-12T19:44:28Z"
+     lastUpdateTime: "2021-12-12T19:44:28Z"
+     message: Deployment has minimum availability.
+     reason: MinimumReplicasAvailable
+     status: "True"
+     type: Available
+   - lastTransitionTime: "2021-12-12T19:44:16Z"
+     lastUpdateTime: "2021-12-12T19:44:28Z"
+     message: ReplicaSet "quote-5b69f755c5" has successfully progressed.
+     reason: NewReplicaSetAvailable
+     status: "True"
+     type: Progressing
+   observedGeneration: 1
+   readyReplicas: 1
+   replicas: 1
+   updatedReplicas: 1
+
+
+
+> kubectl diff -f deployment.yaml
+> kubectl apply -f deployment.yaml
+
+
+
+
+
+
+
